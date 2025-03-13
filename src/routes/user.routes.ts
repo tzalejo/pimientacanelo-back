@@ -3,7 +3,7 @@ import {
     // getUsers,
     // getUser,
     createUser,
-    // updateUser,
+    updateUser,
     // deleteUser,
 } from '../controllers/user.controller';
 
