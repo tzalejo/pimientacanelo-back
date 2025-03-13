@@ -1,0 +1,17 @@
+services:
+  postgres:
+    container_name: postgres
+    image:
+      postgres:${DB_VERSION}-${DB_VERSION_VARIANTE}
+      # context: .
+      # dockerfile: db.dockerfile
+    tty: true
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # POSTGRES_DB: ${DB_BASEDATA}
+    volumes:
+      - ./${DB_VOLUMEN_PATH}:/var/lib/postgresql/data/
+      - ./db:/docker-entrypoint-initdb.d/
