@@ -39,7 +39,7 @@ interface UserBodyCreate {
 // };
 
 export const createUser = async (
-    req: Request<any, any, UserBodyCreate>,
+    req: Request<{}, {}, UserBodyCreate>,
     res: Response,
 ) => {
     const { firstname, lastname, email, password } = req.body;
@@ -55,25 +55,22 @@ export const createUser = async (
     return res.json(user);
 };
 
-// export const updateUser = async (
-//     req: Request,
-//     res: Response,
-// ): Promise<Response> => {
-//     const { id } = req.params;
-//
-//     try {
-//         const user = await User.findOneBy({ id: parseInt(id) });
-//         if (!user) return res.status(404).json({ message: 'Not user found' });
-//
-//         await User.update({ id: parseInt(id) }, req.body);
-//
-//         return res.sendStatus(204);
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             return res.status(500).json({ message: error.message });
-//         }
-//     }
-// };
+export const updateUser = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        const user = await User.findOneBy({ id: parseInt(id) });
+        if (!user) return res.status(404).json({ message: 'Not user found' });
+
+        await User.update({ id: parseInt(id) }, req.body);
+
+        return res.sendStatus(204);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+};
 
 // export const deleteUser = async (req: Request, res: Response) => {
 //     const { id } = req.params;

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  // getUsers,
-  // getUser,
-  createUser,
-  // updateUser,
-  // deleteUser,
+    // getUsers,
+    // getUser,
+    createUser,
+    // updateUser,
+    // deleteUser,
 } from '../controllers/user.controller';
 
 const router = Router({ mergeParams: true });
@@ -15,7 +15,7 @@ const router = Router({ mergeParams: true });
 
 router.post('/users', createUser);
 
-// router.put('/users/:id', updateUser);
+router.put('/users/:id', updateUser);
 
 // router.delete('/users/:id', deleteUser);
 
