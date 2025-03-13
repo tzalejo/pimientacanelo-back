@@ -52,6 +52,6 @@ export class Product extends BaseEntity {
     @CreateDateColumn({ type: 'timestamp', name: 'created_at', nullable: true })
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp', name: 'udated_at', nullable: true })
+    @UpdateDateColumn({ type: 'timestamp', name: 'updated_at', nullable: true })
     updatedAt: Date;
 }
