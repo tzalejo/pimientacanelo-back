@@ -54,4 +54,5 @@ export class Product extends BaseEntity {
 
     @UpdateDateColumn({ type: 'timestamp', name: 'updated_at', nullable: true })
     updatedAt: Date;
+    product: Category[];
 }
