@@ -7,6 +7,7 @@ interface UserBodyCreate {
     lastname: string;
     email: string;
     password: string;
+    phone: string;
 }
 
 // export const getUsers = async (req: Request, res: Response) => {
@@ -42,11 +43,12 @@ export const createUser = async (
     req: Request<{}, {}, UserBodyCreate>,
     res: Response,
 ) => {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, email, password, phone } = req.body;
     const user = new User();
     user.firstname = firstname;
     user.lastname = lastname;
     user.email = email;
+    user.phone = phone;
 
     const salt = await genSalt();
     user.password = await hash(password, salt);
