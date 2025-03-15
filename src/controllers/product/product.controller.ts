@@ -4,6 +4,14 @@ import { Category } from '../../entity/Category';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
+        const { featured } = req.params;
+
+        if (featured) {
+            const products = await Product.find({
+                where: { featured: true },
+            });
+            return res.json(products);
+        }
         const products = await Product.find();
         return res.json(products);
     } catch (error) {

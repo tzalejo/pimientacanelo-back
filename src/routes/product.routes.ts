@@ -11,6 +11,8 @@ const router = Router({ mergeParams: true });
 
 router.get('/product', getProducts);
 
+router.get('/product/:featured', getProducts);
+
 router.get('/product/:id', getProduct);
 
 router.post('/product', createProduct);

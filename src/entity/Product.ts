@@ -35,13 +35,12 @@ export class Product extends BaseEntity {
 
     @Column()
     preparationTime?: string;
-    // featured: boolean;
-    // allergens?: string[];
-    // purchaseType: 'cart' | 'whatsapp';
-    // whatsappNumber?: string;
+
+    @Column({ default: false })
+    featured: boolean; // productos destacado
 
     @Column()
-    available: boolean; // New field to track product availability
+    available: boolean; // disponibilidad
 
     @ManyToOne(() => Category, (category) => category.products)
     category: Category;
