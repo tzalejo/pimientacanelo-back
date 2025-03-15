@@ -91,3 +91,21 @@ export const createProduct = async (req: Request, res: Response) => {
         }
     }
 };
+
+export const updateProduct = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        const product = await Product.findOneBy({ id });
+        if (!product)
+            return res.status(404).json({ message: 'Product not found' });
+
+        await Product.update({ id }, req.body);
+
+        return res.sendStatus(204);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+};
