@@ -1,18 +1,26 @@
 import { User } from '../entity/User';
 import { genSalt, hash } from 'bcryptjs';
+import {
+    USERNAME as username,
+    USERLASTNAME as userLastname,
+    PASSWORD as password,
+    EMAIL as email,
+    PHONE as phone,
+} from './../config';
 
 export const createDefaultUser = async () => {
-    const defaultEmail = process.env.EMAIL; // 👈 Correo por defecto
+    const defaultEmail = email;
     const existingUser = await User.findOneBy({ email: defaultEmail });
 
     if (!existingUser) {
         const user = new User();
-        user.firstname = process.env.USER || 'noelia';
-        user.lastname = 'fernandez';
-        user.email = defaultEmail || 'mWYiI@example.com';
+        user.firstname = username;
+        user.lastname = userLastname;
+        user.email = defaultEmail;
+        user.phone = phone;
 
         const salt = await genSalt(10);
-        user.password = await hash(process.env.PASSWORD || '123456', salt); // 👈 Contraseña por defecto
+        user.password = await hash(password, salt); // 👈 Contraseña por defecto
 
         await user.save();
         console.log('✅ Usuario por defecto creado correctamente.');
