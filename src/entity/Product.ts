@@ -41,8 +41,8 @@ export class Product extends BaseEntity {
 
     @Column()
     available: boolean; // disponibilidad
-
-    @ManyToOne(() => Category, (category) => category.products)
+    // eager: cada vez q hagamos un select de nuestra entidad user, el automaticamente me trae detalle
+    @ManyToOne(() => Category, (category) => category.products, { eager: true })
     category: Category;
 
     @OneToMany(() => Ingredient, (ingredient) => ingredient.product)

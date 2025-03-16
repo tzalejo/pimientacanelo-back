@@ -9,14 +9,14 @@ import {
 
 const router = Router({ mergeParams: true });
 
-router.get('/category', getCategories);
+router.get('/categories', getCategories);
 
-router.get('/category/:id', getCategory);
+router.get('/categories/:id', getCategory);
 
-router.post('/category', createCategory);
+router.post('/categories', createCategory);
 
-router.put('/category/:id', updateCategory);
+router.put('/categories/:id', updateCategory);
 
-router.delete('/category/:id', deleteCategory);
+router.delete('/categories/:id', deleteCategory);
 
 export default router;

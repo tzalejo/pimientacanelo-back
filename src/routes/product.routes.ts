@@ -9,16 +9,16 @@ import {
 
 const router = Router({ mergeParams: true });
 
-router.get('/product', getProducts);
+router.get('/products', getProducts);
 
-router.get('/product/:featured', getProducts);
+router.get('/products/:featured', getProducts);
 
-router.get('/product/:id', getProduct);
+router.get('/products/:id', getProduct);
 
-router.post('/product', createProduct);
+router.post('/products', createProduct);
 
-router.put('/product/:id', updateProduct);
+router.put('/products/:id', updateProduct);
 
-router.delete('/product/:id', deleteProduct);
+router.delete('/products/:id', deleteProduct);
 
 export default router;

@@ -59,40 +59,37 @@ export const createProduct = async (req: Request, res: Response) => {
             name,
             description,
             price,
-            categoryId,
+            category,
             imageUrl,
             calories,
             preparationTime,
             available,
-            ingredients,
         } = req.body;
-        const category = await Category.findOne({
-            where: { id: categoryId },
+        const getCategory = await Category.findOne({
+            where: { id: category['id'] },
         });
 
-        if (!category) {
-            if (!category) {
-                return res.status(404).json({ message: 'Category not found' });
-            }
-
-            const product = new Product();
-            product.name = name;
-            product.description = description;
-            product.price = price;
-            product.category = category;
-            product.imageUrl = imageUrl;
-            product.calories = calories;
-            product.preparationTime = preparationTime;
-            product.available = available;
-            await product.save();
-
-            // if (ingredients) {
-            // const ingredientIds = ingredients.map((id: string) => ({ id }));
-            // await product.ingredients.set(ingredientIds);
-            // }
-
-            return res.json(product);
+        if (!getCategory) {
+            return res.status(404).json({ message: 'Category not found' });
         }
+
+        const product = new Product();
+        product.name = name;
+        product.description = description;
+        product.price = price;
+        product.category = category;
+        product.imageUrl = imageUrl;
+        product.calories = calories;
+        product.preparationTime = preparationTime;
+        product.available = available;
+        await product.save();
+
+        // if (ingredients) {
+        // const ingredientIds = ingredients.map((id: string) => ({ id }));
+        // await product.ingredients.set(ingredientIds);
+        // }
+
+        return res.json(product);
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
