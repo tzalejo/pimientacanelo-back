@@ -73,6 +73,9 @@ export const createProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
+        console.log('file updated');
+        console.log(req.file);
+
         const product = new Product();
         product.name = name;
         product.description = description;

@@ -2,7 +2,7 @@ import app from './app';
 import { PORT } from './config';
 import { AppDataSource } from './db';
 import { createDefaultUser } from './services/init.service';
-
+import 'reflect-metadata';
 async function main() {
     try {
         await AppDataSource.initialize();

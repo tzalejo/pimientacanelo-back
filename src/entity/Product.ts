@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Category } from './Category';
 import { Ingredient } from './Ingredient';
+import { ProductImage } from './ProductImage';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -47,6 +48,9 @@ export class Product extends BaseEntity {
 
     @OneToMany(() => Ingredient, (ingredient) => ingredient.product)
     ingredients: Ingredient[];
+
+    @OneToMany(() => ProductImage, (productImage) => productImage.product)
+    productImages: ProductImage[];
 
     @CreateDateColumn({ type: 'timestamp', name: 'created_at', nullable: true })
     createdAt: Date;

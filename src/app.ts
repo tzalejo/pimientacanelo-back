@@ -9,7 +9,14 @@ import productRoutes from './routes/product.routes';
 const app = express();
 
 app.use(morgan('dev'));
-app.use(cors());
+app.use(
+    cors({
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+    }),
+);
 app.use(express.json());
 
 app.use('/api', userRoutes);

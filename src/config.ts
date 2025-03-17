@@ -1,13 +1,16 @@
 import dotenv from 'dotenv';
-dotenv.config();
+const envfile = dotenv.config();
 
+if (envfile.error) {
+    throw new Error('No se pudo cargar el archivo .env');
+}
 // Función para obtener una variable de entorno asegurando que no sea undefined
 const getEnvVar = (key: string): string => {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`La variable de entorno ${key} no está definida.`);
-  }
-  return value;
+    const value = process.env[key];
+    if (!value) {
+        throw new Error(`La variable de entorno ${key} no está definida.`);
+    }
+    return value;
 };
 
 export const PORT = getEnvVar('PORT');

@@ -3,6 +3,7 @@ import { User } from './entity/User';
 import { Category } from './entity/Category';
 import { Product } from './entity/Product';
 import { Ingredient } from './entity/Ingredient';
+import { ProductImage } from './entity/ProductImage';
 import {
     DB_HOST,
     DB_PORT,
@@ -20,5 +21,5 @@ export const AppDataSource = new DataSource({
     database: DB_DATABASE,
     synchronize: true,
     logging: true,
-    entities: [User, Category, Product, Ingredient],
+    entities: [User, Category, Product, Ingredient, ProductImage],
 });
