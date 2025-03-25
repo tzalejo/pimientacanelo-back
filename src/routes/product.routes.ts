@@ -7,7 +7,7 @@ import {
     updateProduct,
 } from '../controllers/product/product.controller';
 
-import { upload } from '../middlewares/uploadFiles.middleware';
+import { uploadFile } from '../middlewares/uploadFiles.middleware';
 
 const router = Router({ mergeParams: true });
 
@@ -17,7 +17,7 @@ router.get('/products/:featured', getProducts);
 
 router.get('/products/:id', getProduct);
 
-router.post('/products', upload, createProduct);
+router.post('/products', uploadFile, createProduct);
 
 router.put('/products/:id', updateProduct);
 

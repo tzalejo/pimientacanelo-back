@@ -6,7 +6,7 @@ import path from 'path';
 // Defining storage of files
 const storage = multer.diskStorage({
     destination: path.join(__dirname, '../../public/uploads'),
-    filename: function (
+    filename: function(
         req: Request,
         file: Express.Multer.File,
         cb: (error: Error | null, destination: string) => void,
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
         cb(
             null,
             uuid +
-                file.originalname.substring(file.originalname.lastIndexOf('.')),
+            file.originalname.substring(file.originalname.lastIndexOf('.')),
         );
     },
 });
@@ -37,7 +37,7 @@ const fileFilter = (
 
 const maxSize = 5 * 1024 * 1024;
 
-export const upload = (req: Request, res: Response, next: NextFunction) => {
+export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
     return multer({
         storage,
         limits: { fileSize: maxSize },
