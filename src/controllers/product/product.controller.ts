@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Product } from '../../entity/Product';
 import { Category } from '../../entity/Category';
+import { ProductImage } from '../../entity/ProductImage';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -60,32 +61,43 @@ export const createProduct = async (req: Request, res: Response) => {
             description,
             price,
             category,
-            imageUrl,
             calories,
             preparationTime,
             available,
-        } = req.body;
+        } = JSON.parse(req.body.data);
+
         const getCategory = await Category.findOne({
-            where: { id: category['id'] },
+            where: { id: category.id },
         });
 
         if (!getCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        console.log('file updated');
-        console.log(req.file);
-
         const product = new Product();
         product.name = name;
         product.description = description;
         product.price = price;
-        product.category = category;
-        product.imageUrl = imageUrl;
+        product.category = getCategory;
+        product.imageUrl = req.file ? req.file.path : '';
         product.calories = calories;
         product.preparationTime = preparationTime;
         product.available = available;
         await product.save();
+
+        if (req.file) {
+            const productImage = new ProductImage();
+            productImage.product = product;
+            productImage.fileName = req.file.filename;
+            productImage.fileMimiType = req.file.mimetype;
+            productImage.fileExtension = req.file.originalname.substring(
+                req.file.originalname.lastIndexOf('.'),
+            );
+            productImage.fileSize = req.file.size;
+            productImage.path = req.file.path;
+
+            await productImage.save();
+        }
 
         // if (ingredients) {
         // const ingredientIds = ingredients.map((id: string) => ({ id }));
@@ -94,6 +106,8 @@ export const createProduct = async (req: Request, res: Response) => {
 
         return res.json(product);
     } catch (error) {
+        console.log('Error en createProduct');
+        console.log(error);
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
         }
