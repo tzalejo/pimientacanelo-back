@@ -21,9 +21,6 @@ export class ProductImage extends BaseEntity {
     product: Product;
 
     @Column()
-    image: string;
-
-    @Column()
     fileName: string;
 
     @Column()
@@ -31,4 +28,10 @@ export class ProductImage extends BaseEntity {
 
     @Column()
     fileMimiType: string;
+
+    @Column()
+    fileSize: number;
+
+    @Column()
+    path: string;
 }
