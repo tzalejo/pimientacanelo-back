@@ -13,7 +13,7 @@ const router = Router({ mergeParams: true });
 
 router.get('/products', getProducts);
 
-router.get('/products/:featured', getProducts);
+router.get('/products/featured', getProducts);
 
 router.get('/products/:id', getProduct);
 

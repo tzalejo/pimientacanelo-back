@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Product } from '../../entity/Product';
 import { Category } from '../../entity/Category';
 import { ProductImage } from '../../entity/ProductImage';
+import cloudinary from '../../config';
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -56,6 +57,16 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
     try {
+        // Validación inicial
+        if (!req.body.data) {
+            return res
+                .status(400)
+                .json({ message: 'No product data provided' });
+        }
+
+        const { data } = req.body;
+        const productData = JSON.parse(data);
+
         const {
             name,
             description,
@@ -64,47 +75,65 @@ export const createProduct = async (req: Request, res: Response) => {
             calories,
             preparationTime,
             available,
-        } = JSON.parse(req.body.data);
+        } = productData;
+
+        // Validación de campos requeridos
+        if (
+            !name ||
+            !description ||
+            !price ||
+            !category ||
+            !calories ||
+            !preparationTime
+        ) {
+            return res
+                .status(400)
+                .json({ message: 'Please provide all required fields' });
+        }
 
         const getCategory = await Category.findOne({
             where: { id: category.id },
         });
-
         if (!getCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }
 
+        // Crear el producto
         const product = new Product();
-        product.name = name;
-        product.description = description;
-        product.price = price;
-        product.category = getCategory;
-        product.imageUrl = req.file ? req.file.path : '';
-        product.calories = calories;
-        product.preparationTime = preparationTime;
-        product.available = available;
+        Object.assign(product, {
+            name,
+            description,
+            price,
+            category: getCategory,
+            calories,
+            preparationTime,
+            available,
+        });
         await product.save();
 
-        if (req.file) {
-            const productImage = new ProductImage();
-            productImage.product = product;
-            productImage.fileName = req.file.filename;
-            productImage.fileMimiType = req.file.mimetype;
-            productImage.fileExtension = req.file.originalname.substring(
-                req.file.originalname.lastIndexOf('.'),
-            );
-            productImage.fileSize = req.file.size;
-            productImage.path = req.file.path;
-
-            await productImage.save();
+        // Verificar la existencia de imagen
+        if (!req.file) {
+            return res.status(400).json({ message: 'Image not found' });
         }
 
-        // if (ingredients) {
-        // const ingredientIds = ingredients.map((id: string) => ({ id }));
-        // await product.ingredients.set(ingredientIds);
-        // }
+        // Subir la imagen
+        const uploadResult = await cloudinary.uploader.upload(req.file.path);
+        const productImage = new ProductImage();
+        Object.assign(productImage, {
+            product,
+            fileName: uploadResult?.public_id,
+            fileMimiType: uploadResult?.format,
+            fileExtension: uploadResult?.format,
+            fileSize: uploadResult?.bytes,
+            path: uploadResult?.secure_url,
+        });
 
-        return res.json(product);
+        await productImage.save();
+
+        return res.status(201).json({
+            message: 'Product created successfully',
+            data: product,
+        });
     } catch (error) {
         console.log('Error en createProduct');
         console.log(error);

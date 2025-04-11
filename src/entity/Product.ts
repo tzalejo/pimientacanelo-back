@@ -29,9 +29,6 @@ export class Product extends BaseEntity {
     price: number;
 
     @Column()
-    imageUrl: string;
-
-    @Column()
     calories: string;
 
     @Column()
@@ -49,7 +46,9 @@ export class Product extends BaseEntity {
     @OneToMany(() => Ingredient, (ingredient) => ingredient.product)
     ingredients: Ingredient[];
 
-    @OneToMany(() => ProductImage, (productImage) => productImage.product)
+    @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+        eager: true,
+    })
     productImages: ProductImage[];
 
     @CreateDateColumn({ type: 'timestamp', name: 'created_at', nullable: true })
