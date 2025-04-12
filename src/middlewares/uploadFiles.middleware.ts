@@ -1,12 +1,10 @@
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import multer, { FileFilterCallback } from 'multer';
-import path from 'path';
 
 // Defining storage of files
 const storage = multer.diskStorage({
-    destination: path.join(__dirname, '../../public/uploads'),
-    filename: function(
+    filename: function (
         req: Request,
         file: Express.Multer.File,
         cb: (error: Error | null, destination: string) => void,
@@ -26,16 +24,21 @@ const fileFilter = (
     file: Express.Multer.File,
     cb: FileFilterCallback,
 ) => {
-    const fileTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'];
+    const allowedFileTypes = new Set([
+        'image/png',
+        'image/jpg',
+        'image/jpeg',
+        'image/gif',
+    ]);
 
-    if (fileTypes.some((fileType) => fileType === file.mimetype)) {
+    if (allowedFileTypes.has(file.mimetype)) {
         return cb(null, true);
     }
 
     return cb(null, false);
 };
 
-const maxSize = 5 * 1024 * 1024;
+const maxSize = 5 * 1024 * 1024; // 5 MB
 
 export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
     return multer({
@@ -43,24 +46,26 @@ export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
         limits: { fileSize: maxSize },
         fileFilter,
     }).single('image')(req, res, (err) => {
-        console.log('dentro del upload');
-        console.log(req);
-        // File size error
-        if (err instanceof multer.MulterError)
-            return res.status(400).json('Max file size 5MB allowed!');
-
         // Invalid file type, message will return from fileFilter callback
         if (err) {
-            console.log('upload: err');
-            console.log(err);
-            return res.status(400).json(err.message);
+            let errorMessage = 'An unknown error occurred.';
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    errorMessage = `File size exceeds the ${maxSize / (1024 * 1024)} MB limit.`;
+                } else {
+                    errorMessage = `Multer error: ${err.message}`;
+                }
+            } else {
+                errorMessage = err.message;
+            }
+            return res.status(400).json({ message: errorMessage });
         }
 
         // File not selected or incorrect format
         if (!req.file) {
-            console.log('upload: file');
             return res.status(400).json({
-                msg: 'No file has been uploaded, remember that you can only upload .jpeg, .jpg, .png and .gif formats.',
+                message:
+                    'No file has been uploaded, remember that you can only upload .jpeg, .jpg, .png and .gif formats.',
             });
         }
 
