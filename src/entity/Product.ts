@@ -29,9 +29,6 @@ export class Product extends BaseEntity {
     price: number;
 
     @Column()
-    calories: string;
-
-    @Column()
     preparationTime?: string;
 
     @Column({ default: false })

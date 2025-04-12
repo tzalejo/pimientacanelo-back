@@ -57,25 +57,24 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
     try {
+        console.log('req.body', req.body);
         // Validación inicial
-        if (!req.body.data) {
+        if (!req.body) {
             return res
                 .status(400)
                 .json({ message: 'No product data provided' });
         }
 
-        const { data } = req.body;
-        const productData = JSON.parse(data);
+        // const productData = JSON.parse(req.body);
 
         const {
             name,
             description,
             price,
             category,
-            calories,
             preparationTime,
             available,
-        } = productData;
+        } = req.body;
 
         // Validación de campos requeridos
         if (
@@ -83,8 +82,8 @@ export const createProduct = async (req: Request, res: Response) => {
             !description ||
             !price ||
             !category ||
-            !calories ||
-            !preparationTime
+            !preparationTime ||
+            !available
         ) {
             return res
                 .status(400)
@@ -105,7 +104,6 @@ export const createProduct = async (req: Request, res: Response) => {
             description,
             price,
             category: getCategory,
-            calories,
             preparationTime,
             available,
         });
