@@ -6,6 +6,7 @@ import {
     PASSWORD as password,
     EMAIL as email,
     PHONE as phone,
+    ADDRESS as address,
 } from './../config';
 
 export const createDefaultUser = async () => {
@@ -18,6 +19,7 @@ export const createDefaultUser = async () => {
         user.lastname = userLastname;
         user.email = defaultEmail;
         user.phone = phone;
+        user.address = address;
 
         const salt = await genSalt(10);
         user.password = await hash(password, salt); // 👈 Contraseña por defecto

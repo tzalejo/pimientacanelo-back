@@ -28,6 +28,9 @@ export class User extends BaseEntity {
     @Column({ type: 'varchar', nullable: false })
     password: string;
 
+    @Column({ type: 'varchar', nullable: true })
+    address: string;
+
     @CreateDateColumn({ type: 'timestamp', name: 'created_at', nullable: true })
     createdAt: Date;
 

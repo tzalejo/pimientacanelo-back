@@ -13,7 +13,8 @@ interface UserBodyCreate {
 export const getUsers = async (req: Request, res: Response) => {
     try {
         const users = await User.find();
-        return res.json(users);
+        const { firstname, lastname, phone, address, email } = users[0];
+        return res.json({ firstname, lastname, phone, address, email });
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
