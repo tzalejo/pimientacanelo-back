@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { User } from '../entity/User';
-import { genSalt, hash } from 'bcryptjs';
+import { genSalt, hash, compare } from 'bcryptjs';
 
 interface UserBodyCreate {
     firstname: string;
@@ -22,23 +22,25 @@ export const getUsers = async (req: Request, res: Response) => {
     }
 };
 
-// export const getUser = async (
-//     req: Request,
-//     res: Response,
-// ): Promise<Response> => {
-//     try {
-//         const { id } = req.params;
-//         const user = await User.findOneBy({ id: parseInt(id) });
-//
-//         if (!user) return res.status(404).json({ message: 'User not found' });
-//
-//         return res.json(user);
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             return res.status(500).json({ message: error.message });
-//         }
-//     }
-// };
+export const getEmailUser = async (req: Request, res: Response) => {
+    try {
+        // console.log(req.body);
+        // body: {
+        //     name: 'Alejandro Valenzuela',
+        //     email: 'tzalejo@gmail.com',
+        //     phone: '+542901642028',
+        //     eventDate: '2025-04-30T03:00:00.000Z',
+        //     guestCount: '100',
+        //     cakeType: 'Torta presupuesto',
+        //     message: 'kjñlkfjsañlkfdjñalsdkj akjdfñlakjdsñ laksjdfñlkajsdlkajñldskj ñalskdjf skdfj'
+        //   }
+        return res.json('Enviado Solicitud');
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+};
 
 export const createUser = async (
     req: Request<{}, {}, UserBodyCreate>,
@@ -75,18 +77,29 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 };
 
-// export const deleteUser = async (req: Request, res: Response) => {
-//     const { id } = req.params;
-//     try {
-//         const result = await User.delete({ id: parseInt(id) });
-//
-//         if (result.affected === 0)
-//             return res.status(404).json({ message: 'User not found' });
-//
-//         return res.sendStatus(204);
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             return res.status(500).json({ message: error.message });
-//         }
-//     }
-// };
+export const adminLogin = async (req: Request, res: Response) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ where: { firstname: username } });
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ message: 'El Usuario no existe con ese nombre' });
+        }
+
+        // campara los pass y devuelve un boolena
+        const isMatch = await compare(password, user.password);
+        if (!isMatch) {
+            return res
+                .status(401)
+                .json({ message: 'Invalido la credenciales' });
+        }
+
+        return res.json(user);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+};

@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import {
+    adminLogin,
     getUsers,
-    // getUser,
+    getEmailUser,
     createUser,
     updateUser,
     // deleteUser,
@@ -10,7 +11,9 @@ import {
 const router = Router({ mergeParams: true });
 
 router.get('/users', getUsers);
+router.post('/users/email/quote-request', getEmailUser);
 router.post('/users', createUser);
 router.put('/users/:id', updateUser);
+router.post('/admin/login', adminLogin);
 
 export default router;
