@@ -1,8 +1,6 @@
 dist
 node_modules
-db
 pgdata
-
 .env
 coverage
 .qodo

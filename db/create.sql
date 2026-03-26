@@ -1,0 +1,2 @@
+-- La base de datos es creada automáticamente por la variable POSTGRES_DB en docker-compose.
+-- Este archivo se mantiene como referencia.
