@@ -32,24 +32,34 @@ describe('Product Controller', () => {
     });
 
     describe('getProducts', () => {
-        it('should return all products', async () => {
+        it('should return paginated products', async () => {
             const mockProducts = [
                 { id: 1, name: 'Product 1' },
                 { id: 2, name: 'Product 2' },
             ];
+            mockRequest.query = {};
 
-            (Product.find as jest.Mock).mockResolvedValue(mockProducts);
+            (Product as unknown as { findAndCount: jest.Mock }).findAndCount =
+                jest.fn().mockResolvedValue([mockProducts, 2]);
 
             await getProducts(mockRequest as Request, mockResponse as Response, mockNext);
 
-            expect(Product.find).toHaveBeenCalled();
-            expect(mockResponse.json).toHaveBeenCalledWith(mockProducts);
+            expect(Product.findAndCount).toHaveBeenCalled();
+            expect(mockResponse.json).toHaveBeenCalledWith({
+                data: mockProducts,
+                total: 2,
+                page: 1,
+                limit: 12,
+                totalPages: 1,
+            });
         });
 
         it('should handle errors', async () => {
             const errorMessage = 'Database error';
             const error = new Error(errorMessage);
-            (Product.find as jest.Mock).mockRejectedValue(error);
+            mockRequest.query = {};
+            (Product as unknown as { findAndCount: jest.Mock }).findAndCount =
+                jest.fn().mockRejectedValue(error);
 
             await getProducts(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -62,17 +72,20 @@ describe('Product Controller', () => {
             const mockProduct = { id: 1, name: 'Product 1' };
             mockRequest.params = { id: '1' };
 
-            (Product.findOneBy as jest.Mock).mockResolvedValue(mockProduct);
+            (Product.findOne as jest.Mock).mockResolvedValue(mockProduct);
 
             await getProduct(mockRequest as Request, mockResponse as Response, mockNext);
 
-            expect(Product.findOneBy).toHaveBeenCalledWith({ id: '1' });
+            expect(Product.findOne).toHaveBeenCalledWith({
+                where: { id: '1' },
+                relations: ['category', 'productImages'],
+            });
             expect(mockResponse.json).toHaveBeenCalledWith(mockProduct);
         });
 
         it('should return 404 if product not found', async () => {
             mockRequest.params = { id: '999' };
-            (Product.findOneBy as jest.Mock).mockResolvedValue(null);
+            (Product.findOne as jest.Mock).mockResolvedValue(null);
 
             await getProduct(mockRequest as Request, mockResponse as Response, mockNext);
 

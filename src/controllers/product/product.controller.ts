@@ -4,10 +4,32 @@ import { Category } from '../../entity/Category';
 import { ProductImage } from '../../entity/ProductImage';
 import cloudinary from '../../config';
 
-export const getProducts = async (_req: Request, res: Response, next: NextFunction) => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const products = await Product.find();
-        return res.json(products);
+        const parsedPage = parseInt(req.query.page as string, 10);
+        const parsedLimit = parseInt(req.query.limit as string, 10);
+        const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+        const limit =
+            Number.isNaN(parsedLimit) || parsedLimit < 1
+                ? 12
+                : Math.min(parsedLimit, 100);
+        const category = req.query.category as string | undefined;
+
+        const [products, total] = await Product.findAndCount({
+            relations: ['category', 'productImages'],
+            where: category ? { category: { id: category } } : {},
+            skip: (page - 1) * limit,
+            take: limit,
+            order: { createdAt: 'DESC' },
+        });
+
+        return res.json({
+            data: products,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        });
     } catch (error) {
         next(error);
     }
@@ -15,7 +37,10 @@ export const getProducts = async (_req: Request, res: Response, next: NextFuncti
 
 export const getFeaturedProducts = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const products = await Product.find({ where: { featured: true } });
+        const products = await Product.find({
+            where: { featured: true },
+            relations: ['category', 'productImages'],
+        });
         return res.json(products);
     } catch (error) {
         next(error);
@@ -25,7 +50,10 @@ export const getFeaturedProducts = async (_req: Request, res: Response, next: Ne
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const product = await Product.findOneBy({ id: id });
+        const product = await Product.findOne({
+            where: { id },
+            relations: ['category', 'productImages'],
+        });
 
         if (!product)
             return res.status(404).json({ message: 'Product not found' });

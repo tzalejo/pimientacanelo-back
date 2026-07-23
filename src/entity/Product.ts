@@ -41,15 +41,13 @@ export class Product extends BaseEntity {
     available: boolean; // disponibilidad
     // eager: cada vez q hagamos un select de nuestra entidad user, el automaticamente me trae detalle
     @Index()
-    @ManyToOne(() => Category, (category) => category.products, { eager: true })
+    @ManyToOne(() => Category, (category) => category.products)
     category: Category;
 
     @OneToMany(() => Ingredient, (ingredient) => ingredient.product)
     ingredients: Ingredient[];
 
-    @OneToMany(() => ProductImage, (productImage) => productImage.product, {
-        eager: true,
-    })
+    @OneToMany(() => ProductImage, (productImage) => productImage.product)
     productImages: ProductImage[];
 
     @CreateDateColumn({ type: 'timestamp', name: 'created_at', nullable: true })
