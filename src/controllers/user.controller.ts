@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { User } from '../entity/User';
 import { genSalt, hash, compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
+import { JWT_SECRET } from '../config';
 
 interface UserBodyCreate {
     firstname: string;
@@ -10,7 +12,7 @@ interface UserBodyCreate {
     phone: string;
 }
 
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (_req: Request, res: Response) => {
     try {
         const users = await User.find();
         const { firstname, lastname, phone, address, email } = users[0];
@@ -22,7 +24,7 @@ export const getUsers = async (req: Request, res: Response) => {
     }
 };
 
-export const getEmailUser = async (req: Request, res: Response) => {
+export const getEmailUser = async (_req: Request, res: Response) => {
     try {
         // console.log(req.body);
         // body: {
@@ -46,18 +48,27 @@ export const createUser = async (
     req: Request<{}, {}, UserBodyCreate>,
     res: Response,
 ) => {
-    const { firstname, lastname, email, password, phone } = req.body;
-    const user = new User();
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.email = email;
-    user.phone = phone;
+    try {
+        const { firstname, lastname, email, password, phone } = req.body;
+        const user = new User();
+        user.firstname = firstname;
+        user.lastname = lastname;
+        user.email = email;
+        user.phone = phone;
 
-    const salt = await genSalt();
-    user.password = await hash(password, salt);
+        const salt = await genSalt();
+        user.password = await hash(password, salt);
 
-    await user.save();
-    return res.json(user);
+        await user.save();
+        return res.json(user);
+    } catch (error) {
+        if (error instanceof Error && 'code' in error && error.code === '23505') {
+            return res.status(409).json({ message: 'Ya existe un usuario con ese email' });
+        }
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
 };
 
 export const updateUser = async (req: Request, res: Response) => {
@@ -67,7 +78,16 @@ export const updateUser = async (req: Request, res: Response) => {
         const user = await User.findOneBy({ id: parseInt(id) });
         if (!user) return res.status(404).json({ message: 'Not user found' });
 
-        await User.update({ id: parseInt(id) }, req.body);
+        const { firstname, lastname, email, phone, address } = req.body;
+        const updateData: Record<string, unknown> = {};
+
+        if (firstname !== undefined) updateData.firstname = firstname;
+        if (lastname !== undefined) updateData.lastname = lastname;
+        if (email !== undefined) updateData.email = email;
+        if (phone !== undefined) updateData.phone = phone;
+        if (address !== undefined) updateData.address = address;
+
+        await User.update({ id: parseInt(id) }, updateData);
 
         return res.sendStatus(204);
     } catch (error) {
@@ -96,7 +116,12 @@ export const adminLogin = async (req: Request, res: Response) => {
                 .json({ message: 'Invalido la credenciales' });
         }
 
-        return res.json(user);
+        const token = sign({ sub: user.id }, JWT_SECRET, { expiresIn: '8h' });
+        const { firstname, lastname, phone, address, email } = user;
+        return res.json({
+            token,
+            user: { firstname, lastname, phone, address, email },
+        });
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
