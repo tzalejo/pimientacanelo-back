@@ -26,6 +26,7 @@ export const PASSWORD = getEnvVar('PASSWORD');
 export const EMAIL = getEnvVar('EMAIL');
 export const PHONE = getEnvVar('PHONE');
 export const ADDRESS = getEnvVar('ADDRESS');
+export const JWT_SECRET = getEnvVar('JWT_SECRET');
 
 cloudinary.config({
     cloud_name: getEnvVar('CLOUDINARY_CLOUD_NAME'),
