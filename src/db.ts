@@ -19,7 +19,8 @@ export const AppDataSource = new DataSource({
     username: DB_USERNAME,
     password: DB_PASSWORD,
     database: DB_DATABASE,
-    synchronize: true,
+    synchronize: false,
     logging: true,
     entities: [User, Category, Product, Ingredient, ProductImage],
+    migrations: [__dirname + '/migrations/*.{ts,js}'],
 });

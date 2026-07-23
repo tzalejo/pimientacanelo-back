@@ -9,17 +9,22 @@
     "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/db.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/db.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/db.ts"
   },
   "keywords": [],
   "author": "alejandro",
   "license": "ISC",
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.14.0",
