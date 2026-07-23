@@ -4,15 +4,20 @@ import { Category } from '../../entity/Category';
 import { ProductImage } from '../../entity/ProductImage';
 import cloudinary from '../../config';
 
-export const getProducts = async (req: Request, res: Response) => {
+export const getProducts = async (_req: Request, res: Response) => {
     try {
-        const { featured } = req.params;
-
-        if (featured) {
-            const products = await Product.find({ where: { featured: true } });
-            return res.json(products);
-        }
         const products = await Product.find();
+        return res.json(products);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
+};
+
+export const getFeaturedProducts = async (_req: Request, res: Response) => {
+    try {
+        const products = await Product.find({ where: { featured: true } });
         return res.json(products);
     } catch (error) {
         if (error instanceof Error) {
@@ -108,16 +113,21 @@ export const createProduct = async (req: Request, res: Response) => {
         // Upload all images to Cloudinary
         for (const file of files) {
             const uploadResult = await cloudinary.uploader.upload(file.path);
-            const productImage = new ProductImage();
-            Object.assign(productImage, {
-                product,
-                fileName: uploadResult.public_id,
-                fileMimiType: file.mimetype,
-                fileExtension: uploadResult.format,
-                fileSize: uploadResult.bytes,
-                path: uploadResult.secure_url,
-            });
-            await productImage.save();
+            try {
+                const productImage = new ProductImage();
+                Object.assign(productImage, {
+                    product,
+                    fileName: uploadResult.public_id,
+                    fileMimiType: file.mimetype,
+                    fileExtension: uploadResult.format,
+                    fileSize: uploadResult.bytes,
+                    path: uploadResult.secure_url,
+                });
+                await productImage.save();
+            } catch (saveError) {
+                await cloudinary.uploader.destroy(uploadResult.public_id);
+                throw saveError;
+            }
         }
 
         return res.status(201).json({
@@ -139,7 +149,26 @@ export const updateProduct = async (req: Request, res: Response) => {
         if (!product)
             return res.status(404).json({ message: 'Product not found' });
 
-        await Product.update({ id }, req.body);
+        const { name, description, price, preparationTime, available, featured, category } = req.body;
+        const updateData: Record<string, unknown> = {};
+
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (price !== undefined) updateData.price = parseFloat(price);
+        if (preparationTime !== undefined) updateData.preparationTime = preparationTime;
+        if (available !== undefined) updateData.available = available === 'true' || available === true;
+        if (featured !== undefined) updateData.featured = featured === 'true' || featured === true;
+
+        if (category !== undefined) {
+            const rawCategory = typeof category === 'string' ? JSON.parse(category) : category;
+            const getCategory = await Category.findOne({ where: { id: rawCategory.id } });
+            if (!getCategory) {
+                return res.status(404).json({ message: 'Category not found' });
+            }
+            updateData.category = getCategory;
+        }
+
+        await Product.update({ id }, updateData);
         return res.sendStatus(204);
     } catch (error) {
         if (error instanceof Error) {
@@ -175,17 +204,22 @@ export const addProductImages = async (req: Request, res: Response) => {
         const newImages: ProductImage[] = [];
         for (const file of files) {
             const uploadResult = await cloudinary.uploader.upload(file.path);
-            const productImage = new ProductImage();
-            Object.assign(productImage, {
-                product,
-                fileName: uploadResult.public_id,
-                fileMimiType: file.mimetype,
-                fileExtension: uploadResult.format,
-                fileSize: uploadResult.bytes,
-                path: uploadResult.secure_url,
-            });
-            await productImage.save();
-            newImages.push(productImage);
+            try {
+                const productImage = new ProductImage();
+                Object.assign(productImage, {
+                    product,
+                    fileName: uploadResult.public_id,
+                    fileMimiType: file.mimetype,
+                    fileExtension: uploadResult.format,
+                    fileSize: uploadResult.bytes,
+                    path: uploadResult.secure_url,
+                });
+                await productImage.save();
+                newImages.push(productImage);
+            } catch (saveError) {
+                await cloudinary.uploader.destroy(uploadResult.public_id);
+                throw saveError;
+            }
         }
 
         return res.status(201).json({
