@@ -7,6 +7,7 @@ import {
     ManyToOne,
     OneToMany,
     BaseEntity,
+    Index,
 } from 'typeorm';
 import { Category } from './Category';
 import { Ingredient } from './Ingredient';
@@ -31,12 +32,15 @@ export class Product extends BaseEntity {
     @Column()
     preparationTime?: string;
 
+    @Index()
     @Column({ default: false })
     featured: boolean; // productos destacado
 
+    @Index()
     @Column()
     available: boolean; // disponibilidad
     // eager: cada vez q hagamos un select de nuestra entidad user, el automaticamente me trae detalle
+    @Index()
     @ManyToOne(() => Category, (category) => category.products, { eager: true })
     category: Category;
 
