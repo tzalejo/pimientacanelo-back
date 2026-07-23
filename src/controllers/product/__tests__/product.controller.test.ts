@@ -15,6 +15,7 @@ jest.mock('../../../entity/Category');
 describe('Product Controller', () => {
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
+    let mockNext: jest.Mock;
     let responseObject = {};
 
     beforeEach(() => {
@@ -27,6 +28,7 @@ describe('Product Controller', () => {
             status: jest.fn().mockReturnThis(),
             sendStatus: jest.fn().mockReturnThis(),
         };
+        mockNext = jest.fn();
     });
 
     describe('getProducts', () => {
@@ -38,7 +40,7 @@ describe('Product Controller', () => {
 
             (Product.find as jest.Mock).mockResolvedValue(mockProducts);
 
-            await getProducts(mockRequest as Request, mockResponse as Response);
+            await getProducts(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(Product.find).toHaveBeenCalled();
             expect(mockResponse.json).toHaveBeenCalledWith(mockProducts);
@@ -46,16 +48,12 @@ describe('Product Controller', () => {
 
         it('should handle errors', async () => {
             const errorMessage = 'Database error';
-            (Product.find as jest.Mock).mockRejectedValue(
-                new Error(errorMessage),
-            );
+            const error = new Error(errorMessage);
+            (Product.find as jest.Mock).mockRejectedValue(error);
 
-            await getProducts(mockRequest as Request, mockResponse as Response);
+            await getProducts(mockRequest as Request, mockResponse as Response, mockNext);
 
-            expect(mockResponse.status).toHaveBeenCalledWith(500);
-            expect(mockResponse.json).toHaveBeenCalledWith({
-                message: errorMessage,
-            });
+            expect(mockNext).toHaveBeenCalledWith(error);
         });
     });
 
@@ -66,7 +64,7 @@ describe('Product Controller', () => {
 
             (Product.findOneBy as jest.Mock).mockResolvedValue(mockProduct);
 
-            await getProduct(mockRequest as Request, mockResponse as Response);
+            await getProduct(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(Product.findOneBy).toHaveBeenCalledWith({ id: '1' });
             expect(mockResponse.json).toHaveBeenCalledWith(mockProduct);
@@ -76,7 +74,7 @@ describe('Product Controller', () => {
             mockRequest.params = { id: '999' };
             (Product.findOneBy as jest.Mock).mockResolvedValue(null);
 
-            await getProduct(mockRequest as Request, mockResponse as Response);
+            await getProduct(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(mockResponse.status).toHaveBeenCalledWith(404);
             expect(mockResponse.json).toHaveBeenCalledWith({
@@ -100,6 +98,7 @@ describe('Product Controller', () => {
             await createProduct(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(Category.findOne).toHaveBeenCalledWith({
@@ -133,6 +132,7 @@ describe('Product Controller', () => {
             await createProduct(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             // expect(Category.findOne).toHaveBeenCalledWith({
@@ -151,6 +151,7 @@ describe('Product Controller', () => {
             await deleteProduct(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(Product.delete).toHaveBeenCalledWith({ id: '1' });
@@ -164,6 +165,7 @@ describe('Product Controller', () => {
             await deleteProduct(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(mockResponse.status).toHaveBeenCalledWith(404);

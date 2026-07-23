@@ -1,32 +1,28 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { Product } from '../../entity/Product';
 import { Category } from '../../entity/Category';
 import { ProductImage } from '../../entity/ProductImage';
 import cloudinary from '../../config';
 
-export const getProducts = async (_req: Request, res: Response) => {
+export const getProducts = async (_req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await Product.find();
         return res.json(products);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const getFeaturedProducts = async (_req: Request, res: Response) => {
+export const getFeaturedProducts = async (_req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await Product.find({ where: { featured: true } });
         return res.json(products);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const getProduct = async (req: Request, res: Response) => {
+export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const product = await Product.findOneBy({ id: id });
@@ -36,13 +32,11 @@ export const getProduct = async (req: Request, res: Response) => {
 
         return res.json(product);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const deleteProduct = async (req: Request, res: Response) => {
+export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     try {
         const product = await Product.findOne({
@@ -65,13 +59,11 @@ export const deleteProduct = async (req: Request, res: Response) => {
         await Product.delete({ id });
         return res.sendStatus(204);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.body) {
             return res.status(400).json({ message: 'No product data provided' });
@@ -135,13 +127,11 @@ export const createProduct = async (req: Request, res: Response) => {
             data: product,
         });
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
     try {
@@ -171,14 +161,12 @@ export const updateProduct = async (req: Request, res: Response) => {
         await Product.update({ id }, updateData);
         return res.sendStatus(204);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
 // POST /products/:id/images — add images to an existing product (max 4 total)
-export const addProductImages = async (req: Request, res: Response) => {
+export const addProductImages = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
     try {
@@ -227,14 +215,12 @@ export const addProductImages = async (req: Request, res: Response) => {
             data: newImages,
         });
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
 // DELETE /products/images/:imageId — remove a single image
-export const deleteProductImage = async (req: Request, res: Response) => {
+export const deleteProductImage = async (req: Request, res: Response, next: NextFunction) => {
     const { imageId } = req.params;
 
     try {
@@ -247,8 +233,6 @@ export const deleteProductImage = async (req: Request, res: Response) => {
 
         return res.sendStatus(204);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };

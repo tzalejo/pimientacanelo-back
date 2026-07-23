@@ -16,6 +16,7 @@ jest.mock('../../../entity/Category');
 describe('Product Controller', () => {
     let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
+    let mockNext: jest.Mock;
     let responseObject = {};
 
     beforeEach(() => {
@@ -28,6 +29,7 @@ describe('Product Controller', () => {
             status: jest.fn().mockReturnThis(),
             sendStatus: jest.fn().mockReturnThis(),
         };
+        mockNext = jest.fn();
     });
 
     describe('get Category', () => {
@@ -42,6 +44,7 @@ describe('Product Controller', () => {
             await getCategories(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(Category.find).toHaveBeenCalled();
@@ -50,19 +53,16 @@ describe('Product Controller', () => {
 
         it('should handle errors', async () => {
             const errorMessage = 'Database error';
-            (Category.find as jest.Mock).mockRejectedValue(
-                new Error(errorMessage),
-            );
+            const error = new Error(errorMessage);
+            (Category.find as jest.Mock).mockRejectedValue(error);
 
             await getCategories(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
-            expect(mockResponse.status).toHaveBeenCalledWith(500);
-            expect(mockResponse.json).toHaveBeenCalledWith({
-                message: errorMessage,
-            });
+            expect(mockNext).toHaveBeenCalledWith(error);
         });
     });
 
@@ -73,7 +73,7 @@ describe('Product Controller', () => {
 
             (Category.findOneBy as jest.Mock).mockResolvedValue(mockCategory);
 
-            await getCategory(mockRequest as Request, mockResponse as Response);
+            await getCategory(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(Category.findOneBy).toHaveBeenCalledWith({ id: '1' });
             expect(mockResponse.json).toHaveBeenCalledWith(mockCategory);
@@ -83,7 +83,7 @@ describe('Product Controller', () => {
             mockRequest.params = { id: '999' };
             (Category.findOneBy as jest.Mock).mockResolvedValue(null);
 
-            await getCategory(mockRequest as Request, mockResponse as Response);
+            await getCategory(mockRequest as Request, mockResponse as Response, mockNext);
 
             expect(mockResponse.status).toHaveBeenCalledWith(404);
             expect(mockResponse.json).toHaveBeenCalledWith({
@@ -104,6 +104,7 @@ describe('Product Controller', () => {
             await createCategory(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             // expect(mockResponse.status).toHaveBeenCalledWith(404);
@@ -128,6 +129,7 @@ describe('Product Controller', () => {
             await createCategory(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
             expect(mockCategory.save).toHaveBeenCalled();
             expect(mockResponse.json).toHaveBeenCalled();
@@ -142,6 +144,7 @@ describe('Product Controller', () => {
             await deleteCategory(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(Category.delete).toHaveBeenCalledWith({ id: '1' });
@@ -155,6 +158,7 @@ describe('Product Controller', () => {
             await deleteCategory(
                 mockRequest as Request,
                 mockResponse as Response,
+            mockNext,
             );
 
             expect(mockResponse.status).toHaveBeenCalledWith(404);

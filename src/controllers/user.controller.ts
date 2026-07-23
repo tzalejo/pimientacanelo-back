@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { User } from '../entity/User';
 import { genSalt, hash, compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
@@ -12,19 +12,17 @@ interface UserBodyCreate {
     phone: string;
 }
 
-export const getUsers = async (_req: Request, res: Response) => {
+export const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
     try {
         const users = await User.find();
         const { firstname, lastname, phone, address, email } = users[0];
         return res.json({ firstname, lastname, phone, address, email });
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const getEmailUser = async (_req: Request, res: Response) => {
+export const getEmailUser = async (_req: Request, res: Response, next: NextFunction) => {
     try {
         // console.log(req.body);
         // body: {
@@ -38,15 +36,14 @@ export const getEmailUser = async (_req: Request, res: Response) => {
         //   }
         return res.json('Enviado Solicitud');
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
 export const createUser = async (
     req: Request<{}, {}, UserBodyCreate>,
     res: Response,
+    next: NextFunction,
 ) => {
     try {
         const { firstname, lastname, email, password, phone } = req.body;
@@ -65,13 +62,11 @@ export const createUser = async (
         if (error instanceof Error && 'code' in error && error.code === '23505') {
             return res.status(409).json({ message: 'Ya existe un usuario con ese email' });
         }
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
     try {
@@ -91,13 +86,11 @@ export const updateUser = async (req: Request, res: Response) => {
 
         return res.sendStatus(204);
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
 
-export const adminLogin = async (req: Request, res: Response) => {
+export const adminLogin = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { username, password } = req.body;
         const user = await User.findOne({ where: { firstname: username } });
@@ -123,8 +116,6 @@ export const adminLogin = async (req: Request, res: Response) => {
             user: { firstname, lastname, phone, address, email },
         });
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(500).json({ message: error.message });
-        }
+        next(error);
     }
 };
